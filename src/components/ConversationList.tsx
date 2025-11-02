@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase, Conversation, Message, Website } from '../lib/supabase';
+import { supabase, Conversation, Website } from '../lib/supabase';
 import { Loader2, MessageSquare, ExternalLink } from 'lucide-react';
 import { ConversationDetailModal } from './ConversationDetailModal';
 

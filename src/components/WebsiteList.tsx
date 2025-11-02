@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase, Website } from '../lib/supabase';
-import { Plus, Trash2, Eye, Code, Loader2, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { Plus, Trash2, Eye, Code, Loader2, AlertCircle, CheckCircle, Clock, Globe } from 'lucide-react';
 import { AddWebsiteModal } from './AddWebsiteModal';
 import { KnowledgeBaseModal } from './KnowledgeBaseModal';
 import { WidgetCodeModal } from './WidgetCodeModal';

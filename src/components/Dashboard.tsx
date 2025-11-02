@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, Globe, MessageSquare, Database, Settings } from 'lucide-react';
+import { LogOut, Globe, MessageSquare, Settings } from 'lucide-react';
 import { WebsiteList } from './WebsiteList';
 import { ConversationList } from './ConversationList';
 

@@ -9,8 +9,9 @@ type Props = {
 
 export function WidgetCodeModal({ website, onClose }: Props) {
   const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<'vanilla' | 'react' | 'nextjs'>('vanilla');
 
-  const widgetCode = `<script>
+  const vanillaCode = `<script>
   (function() {
     var script = document.createElement('script');
     script.src = '${window.location.origin}/widget.js';
@@ -21,8 +22,59 @@ export function WidgetCodeModal({ website, onClose }: Props) {
   })();
 </script>`;
 
+  const reactCode = `import { SiteHelperWidget } from './components/widget';
+
+function App() {
+  return (
+    <div>
+      {/* Your app content */}
+
+      <SiteHelperWidget
+        websiteId="${website.id}"
+        apiUrl="${import.meta.env.VITE_SUPABASE_URL}"
+        theme="${website.widget_config.theme}"
+        primaryColor="${website.widget_config.primaryColor}"
+        position="${website.widget_config.position}"
+        greeting="${website.widget_config.greeting}"
+      />
+    </div>
+  );
+}`;
+
+  const nextjsCode = `import { NextJsWidget } from './components/widget';
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        {children}
+
+        <NextJsWidget
+          websiteId="${website.id}"
+          apiUrl="${import.meta.env.VITE_SUPABASE_URL}"
+          theme="${website.widget_config.theme}"
+          primaryColor="${website.widget_config.primaryColor}"
+          position="${website.widget_config.position}"
+          greeting="${website.widget_config.greeting}"
+        />
+      </body>
+    </html>
+  );
+}`;
+
+  const getActiveCode = () => {
+    switch (activeTab) {
+      case 'react':
+        return reactCode;
+      case 'nextjs':
+        return nextjsCode;
+      default:
+        return vanillaCode;
+    }
+  };
+
   const handleCopy = () => {
-    navigator.clipboard.writeText(widgetCode);
+    navigator.clipboard.writeText(getActiveCode());
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -44,14 +96,63 @@ export function WidgetCodeModal({ website, onClose }: Props) {
         </div>
 
         <div className="p-6 space-y-4">
+          <div className="flex space-x-2 mb-4">
+            <button
+              onClick={() => setActiveTab('vanilla')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === 'vanilla'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Vanilla JS
+            </button>
+            <button
+              onClick={() => setActiveTab('react')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === 'react'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              React
+            </button>
+            <button
+              onClick={() => setActiveTab('nextjs')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === 'nextjs'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Next.js
+            </button>
+          </div>
+
           <div>
-            <p className="text-sm text-gray-700 mb-4">
-              Copy and paste this code snippet into your website's HTML, just before the closing <code className="bg-gray-100 px-1 rounded">&lt;/body&gt;</code> tag:
-            </p>
+            {activeTab === 'vanilla' && (
+              <p className="text-sm text-gray-700 mb-4">
+                Copy and paste this code snippet into your website's HTML, just before the closing <code className="bg-gray-100 px-1 rounded">&lt;/body&gt;</code> tag:
+              </p>
+            )}
+            {activeTab === 'react' && (
+              <div className="text-sm text-gray-700 mb-4 space-y-2">
+                <p className="font-medium">Step 1: Copy the widget components</p>
+                <p>Copy the files from <code className="bg-gray-100 px-1 rounded">src/components/widget/</code> to your React project.</p>
+                <p className="font-medium mt-3">Step 2: Add the widget to your app</p>
+              </div>
+            )}
+            {activeTab === 'nextjs' && (
+              <div className="text-sm text-gray-700 mb-4 space-y-2">
+                <p className="font-medium">Step 1: Copy the widget components</p>
+                <p>Copy the files from <code className="bg-gray-100 px-1 rounded">src/components/widget/</code> to your Next.js project.</p>
+                <p className="font-medium mt-3">Step 2: Add the widget to your layout</p>
+              </div>
+            )}
 
             <div className="relative">
-              <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
-                <code>{widgetCode}</code>
+              <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm max-h-[300px]">
+                <code>{getActiveCode()}</code>
               </pre>
               <button
                 onClick={handleCopy}
