@@ -1,9 +1,9 @@
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { AuthForm } from './components/AuthForm';
-import { Dashboard } from './components/Dashboard';
-import { LandingPage } from './components/LandingPage';
-import { Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { AuthForm } from "./components/AuthForm";
+import { Dashboard } from "./components/Dashboard";
+import { LandingPage } from "./components/LandingPage";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -16,6 +16,7 @@ function AppContent() {
       </div>
     );
   }
+
 
   if (user) {
     return <Dashboard />;

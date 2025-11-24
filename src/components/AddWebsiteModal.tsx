@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { supabase } from '../lib/supabase';
-import { X, Loader2 } from 'lucide-react';
+import { useState } from "react";
+import { supabase } from "../lib/supabase";
+import { X, Loader2 } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 type Props = {
   onClose: () => void;
@@ -8,57 +9,62 @@ type Props = {
 };
 
 export function AddWebsiteModal({ onClose, onSuccess }: Props) {
-  const [name, setName] = useState('');
-  const [url, setUrl] = useState('');
+  const [name, setName] = useState("");
+  const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const { user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       let formattedUrl = url.trim();
-      if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
-        formattedUrl = 'https://' + formattedUrl;
+      if (
+        !formattedUrl.startsWith("http://") &&
+        !formattedUrl.startsWith("https://")
+      ) {
+        formattedUrl = "https://" + formattedUrl;
       }
 
       const { data: website, error: insertError } = await supabase
-        .from('websites')
+        .from("websites")
         .insert({
           name: name.trim(),
           url: formattedUrl,
-          status: 'pending'
+          status: "pending",
+          user_id: user?.id,
         })
         .select()
         .single();
 
       if (insertError) throw insertError;
 
-      const { error: kbError } = await supabase
-        .from('knowledge_bases')
-        .insert({
-          website_id: website.id,
-          content: '',
-          summary: 'Knowledge base is being generated...'
-        });
+      const { error: kbError } = await supabase.from("knowledge_bases").insert({
+        website_id: website.id,
+        content: "",
+        summary: "Knowledge base is being generated...",
+      });
 
       if (kbError) throw kbError;
 
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/scrape-website`;
+      const apiUrl = `${
+        import.meta.env.VITE_SUPABASE_URL
+      }/functions/v1/scrape-website`;
       fetch(apiUrl, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ websiteId: website.id, url: formattedUrl })
-      }).catch(err => console.error('Scrape trigger error:', err));
+        body: JSON.stringify({ websiteId: website.id, url: formattedUrl }),
+      }).catch((err) => console.error("Scrape trigger error:", err));
 
       onSuccess();
     } catch (err: any) {
-      setError(err.message || 'Failed to add website');
+      setError(err.message || "Failed to add website");
     } finally {
       setLoading(false);
     }
@@ -79,7 +85,10 @@ export function AddWebsiteModal({ onClose, onSuccess }: Props) {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Website Name
             </label>
             <input
@@ -94,7 +103,10 @@ export function AddWebsiteModal({ onClose, onSuccess }: Props) {
           </div>
 
           <div>
-            <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="url"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Website URL
             </label>
             <input
@@ -128,7 +140,7 @@ export function AddWebsiteModal({ onClose, onSuccess }: Props) {
               className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              <span>{loading ? 'Adding...' : 'Add Website'}</span>
+              <span>{loading ? "Adding..." : "Add Website"}</span>
             </button>
           </div>
         </form>

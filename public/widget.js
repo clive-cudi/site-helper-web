@@ -1,18 +1,19 @@
-(function() {
-  const websiteId = document.currentScript.getAttribute('data-website-id');
-  const apiUrl = document.currentScript.getAttribute('data-api-url');
+(function () {
+  const websiteId = document.currentScript.getAttribute("data-website-id");
+  const apiUrl = document.currentScript.getAttribute("data-api-url");
 
   if (!websiteId || !apiUrl) {
-    console.error('SiteHelper: Missing configuration');
+    console.error("SiteHelper: Missing configuration");
     return;
   }
 
   let conversationId = null;
-  let visitorId = localStorage.getItem('sitehelper_visitor_id');
+  let visitorId = localStorage.getItem("sitehelper_visitor_id");
 
   if (!visitorId) {
-    visitorId = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substring(7);
-    localStorage.setItem('sitehelper_visitor_id', visitorId);
+    visitorId =
+      "visitor_" + Date.now() + "_" + Math.random().toString(36).substring(7);
+    localStorage.setItem("sitehelper_visitor_id", visitorId);
   }
 
   const styles = `
@@ -183,7 +184,7 @@
     }
   `;
 
-  const styleSheet = document.createElement('style');
+  const styleSheet = document.createElement("style");
   styleSheet.textContent = styles;
   document.head.appendChild(styleSheet);
 
@@ -227,27 +228,27 @@
     </div>
   `;
 
-  const container = document.createElement('div');
+  const container = document.createElement("div");
   container.innerHTML = widgetHTML;
   document.body.appendChild(container);
 
-  const toggleButton = document.getElementById('sitehelper-toggle');
-  const closeButton = document.getElementById('sitehelper-close');
-  const chatWindow = document.getElementById('sitehelper-chat');
-  const messagesContainer = document.getElementById('sitehelper-messages');
-  const input = document.getElementById('sitehelper-input');
-  const sendButton = document.getElementById('sitehelper-send');
+  const toggleButton = document.getElementById("sitehelper-toggle");
+  const closeButton = document.getElementById("sitehelper-close");
+  const chatWindow = document.getElementById("sitehelper-chat");
+  const messagesContainer = document.getElementById("sitehelper-messages");
+  const input = document.getElementById("sitehelper-input");
+  const sendButton = document.getElementById("sitehelper-send");
 
-  toggleButton.addEventListener('click', () => {
-    chatWindow.classList.add('open');
+  toggleButton.addEventListener("click", () => {
+    chatWindow.classList.add("open");
   });
 
-  closeButton.addEventListener('click', () => {
-    chatWindow.classList.remove('open');
+  closeButton.addEventListener("click", () => {
+    chatWindow.classList.remove("open");
   });
 
   function addMessage(content, role) {
-    const messageDiv = document.createElement('div');
+    const messageDiv = document.createElement("div");
     messageDiv.className = `sitehelper-message ${role}`;
     messageDiv.innerHTML = `<div class="sitehelper-message-content">${content}</div>`;
     messagesContainer.appendChild(messageDiv);
@@ -255,16 +256,19 @@
   }
 
   function showTyping() {
-    const typingDiv = document.createElement('div');
-    typingDiv.className = 'sitehelper-message assistant';
-    typingDiv.id = 'sitehelper-typing-indicator';
-    typingDiv.innerHTML = '<div class="sitehelper-typing"><span></span><span></span><span></span></div>';
+    const typingDiv = document.createElement("div");
+    typingDiv.className = "sitehelper-message assistant";
+    typingDiv.id = "sitehelper-typing-indicator";
+    typingDiv.innerHTML =
+      '<div class="sitehelper-typing"><span></span><span></span><span></span></div>';
     messagesContainer.appendChild(typingDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
 
   function hideTyping() {
-    const typingIndicator = document.getElementById('sitehelper-typing-indicator');
+    const typingIndicator = document.getElementById(
+      "sitehelper-typing-indicator"
+    );
     if (typingIndicator) {
       typingIndicator.remove();
     }
@@ -274,47 +278,56 @@
     const message = input.value.trim();
     if (!message) return;
 
-    addMessage(message, 'user');
-    input.value = '';
+    addMessage(message, "user");
+    input.value = "";
     sendButton.disabled = true;
     showTyping();
 
     try {
       const response = await fetch(`${apiUrl}/functions/v1/chat-assistant`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb3hld25peHppaWV5ZWd5a2puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyMTQ1OTgsImV4cCI6MjA3NTc5MDU5OH0.fhucJjp79Xff4JxP_9_NdvOqi6AYhS8kItgYIrohzJg`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           websiteId,
           conversationId,
           message,
-          visitorId
-        })
+          visitorId,
+        }),
       });
+
+      console.log(`response`, response);
 
       const data = await response.json();
       hideTyping();
 
       if (data.error) {
-        addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
+        addMessage(
+          "Sorry, I encountered an error. Please try again.",
+          "assistant"
+        );
       } else {
         conversationId = data.conversationId;
-        addMessage(data.message, 'assistant');
+        addMessage(data.message, "assistant");
       }
     } catch (error) {
       hideTyping();
-      addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
-      console.error('SiteHelper error:', error);
+      addMessage(
+        "Sorry, I encountered an error. Please try again.",
+        "assistant"
+      );
+      console.error("SiteHelper error:", error);
     } finally {
       sendButton.disabled = false;
       input.focus();
     }
   }
 
-  sendButton.addEventListener('click', sendMessage);
-  input.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
+  sendButton.addEventListener("click", sendMessage);
+  input.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
       sendMessage();
     }
   });
