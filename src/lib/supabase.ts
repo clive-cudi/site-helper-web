@@ -9,9 +9,52 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+export type BusinessAccount = {
+  id: string;
+  name: string;
+  owner_id: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TeamMember = {
+  id: string;
+  business_account_id: string;
+  user_id: string;
+  role: 'owner' | 'admin' | 'editor';
+  invited_by: string | null;
+  invited_at: string;
+  joined_at: string | null;
+  status: 'active' | 'invited' | 'suspended';
+};
+
+export type Invitation = {
+  id: string;
+  business_account_id: string;
+  email: string;
+  role: 'admin' | 'editor';
+  invited_by: string;
+  token: string;
+  expires_at: string;
+  accepted_at: string | null;
+  created_at: string;
+  status: 'pending' | 'accepted' | 'expired' | 'revoked';
+};
+
+export type AuditLog = {
+  id: string;
+  business_account_id: string;
+  user_id: string;
+  action: string;
+  resource_type: string;
+  resource_id: string | null;
+  details: Record<string, any>;
+  created_at: string;
+};
+
 export type Website = {
   id: string;
-  user_id: string;
+  business_account_id: string;
   name: string;
   url: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';

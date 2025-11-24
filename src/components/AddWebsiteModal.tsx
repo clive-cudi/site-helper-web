@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
 import { X, Loader2 } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
+import { useTeam } from "../contexts/TeamContext";
 
 type Props = {
   onClose: () => void;
@@ -13,12 +13,18 @@ export function AddWebsiteModal({ onClose, onSuccess }: Props) {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { user } = useAuth();
+  const { businessAccount } = useTeam();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    if (!businessAccount) {
+      setError("Business account not found");
+      setLoading(false);
+      return;
+    }
 
     try {
       let formattedUrl = url.trim();
@@ -35,7 +41,7 @@ export function AddWebsiteModal({ onClose, onSuccess }: Props) {
           name: name.trim(),
           url: formattedUrl,
           status: "pending",
-          user_id: user?.id,
+          business_account_id: businessAccount.id,
         })
         .select()
         .single();

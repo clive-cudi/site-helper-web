@@ -14,6 +14,8 @@ import {
 import { AddWebsiteModal } from "./AddWebsiteModal";
 import { KnowledgeBaseModal } from "./KnowledgeBaseModal";
 import { WidgetCodeModal } from "./WidgetCodeModal";
+import { useTeam } from "../contexts/TeamContext";
+import { PermissionGuard } from "./PermissionGuard";
 
 export function WebsiteList() {
   const [websites, setWebsites] = useState<Website[]>([]);
@@ -22,16 +24,22 @@ export function WebsiteList() {
   const [selectedWebsite, setSelectedWebsite] = useState<Website | null>(null);
   const [showKnowledgeBase, setShowKnowledgeBase] = useState(false);
   const [showWidgetCode, setShowWidgetCode] = useState(false);
+  const { businessAccount } = useTeam();
 
   useEffect(() => {
-    loadWebsites();
-  }, []);
+    if (businessAccount) {
+      loadWebsites();
+    }
+  }, [businessAccount]);
 
   const loadWebsites = async () => {
+    if (!businessAccount) return;
+
     try {
       const { data, error } = await supabase
         .from("websites")
         .select("*")
+        .eq("business_account_id", businessAccount.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -82,13 +90,15 @@ export function WebsiteList() {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-900">Your Websites</h2>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Add Website</span>
-          </button>
+          <PermissionGuard permission="manage_websites">
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Add Website</span>
+            </button>
+          </PermissionGuard>
         </div>
 
         {websites.length === 0 ? (
@@ -100,13 +110,15 @@ export function WebsiteList() {
             <p className="text-gray-600 mb-6">
               Add your first website to get started with AI assistance
             </p>
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              <span>Add Your First Website</span>
-            </button>
+            <PermissionGuard permission="manage_websites">
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              >
+                <Plus className="w-5 h-5" />
+                <span>Add Your First Website</span>
+              </button>
+            </PermissionGuard>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -175,12 +187,14 @@ export function WebsiteList() {
                     <Code className="w-4 h-4" />
                     <span>Widget</span>
                   </button>
-                  <button
-                    onClick={() => handleDelete(website.id)}
-                    className="flex items-center justify-center px-3 py-2 text-sm bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <PermissionGuard permission="manage_websites">
+                    <button
+                      onClick={() => handleDelete(website.id)}
+                      className="flex items-center justify-center px-3 py-2 text-sm bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </PermissionGuard>
                 </div>
               </div>
             ))}

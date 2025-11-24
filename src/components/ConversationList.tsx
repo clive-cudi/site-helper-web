@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase, Conversation, Website } from '../lib/supabase';
-import { Loader2, MessageSquare, ExternalLink } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, Trash2 } from 'lucide-react';
 import { ConversationDetailModal } from './ConversationDetailModal';
+import { useTeam } from '../contexts/TeamContext';
+import { PermissionGuard } from './PermissionGuard';
 
 type ConversationWithWebsite = Conversation & {
   website: Website;
@@ -9,16 +11,22 @@ type ConversationWithWebsite = Conversation & {
 };
 
 export function ConversationList() {
+  const { businessAccount } = useTeam();
   const [conversations, setConversations] = useState<ConversationWithWebsite[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
-    loadConversations();
-  }, []);
+    if (businessAccount) {
+      loadConversations();
+    }
+  }, [businessAccount]);
 
   const loadConversations = async () => {
     try {
+      // Query conversations through websites that belong to the business account
+      // RLS policies will automatically filter websites by business_account_id
       const { data: websites, error: websitesError } = await supabase
         .from('websites')
         .select('id');
@@ -32,6 +40,7 @@ export function ConversationList() {
         return;
       }
 
+      // Query conversations for the business account's websites
       const { data: conversationsData, error: conversationsError } = await supabase
         .from('conversations')
         .select(`
@@ -62,6 +71,33 @@ export function ConversationList() {
       console.error('Error loading conversations:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteConversation = async (conversationId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent opening the conversation detail modal
+
+    if (!confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setDeletingId(conversationId);
+
+      const { error } = await supabase
+        .from('conversations')
+        .delete()
+        .eq('id', conversationId);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setConversations(prev => prev.filter(c => c.id !== conversationId));
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+      alert('Failed to delete conversation. Please try again.');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -101,33 +137,54 @@ export function ConversationList() {
         ) : (
           <div className="bg-white rounded-xl shadow-sm divide-y divide-gray-200">
             {conversations.map((conversation) => (
-              <button
+              <div
                 key={conversation.id}
-                onClick={() => setSelectedConversation(conversation)}
-                className="w-full p-4 hover:bg-gray-50 transition-colors text-left"
+                className="flex items-center hover:bg-gray-50 transition-colors"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className="font-semibold text-gray-900">
-                        {conversation.website.name}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        Visitor {conversation.visitor_id.slice(0, 8)}
-                      </span>
+                <button
+                  onClick={() => setSelectedConversation(conversation)}
+                  className="flex-1 p-4 text-left"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <span className="font-semibold text-gray-900">
+                          {conversation.website.name}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          Visitor {conversation.visitor_id.slice(0, 8)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        {conversation.message_count} messages
+                      </p>
                     </div>
-                    <p className="text-sm text-gray-600">
-                      {conversation.message_count} messages
-                    </p>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-gray-500">
+                        {formatDate(conversation.last_message_at)}
+                      </span>
+                      <ExternalLink className="w-4 h-4 text-gray-400" />
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-500">
-                      {formatDate(conversation.last_message_at)}
-                    </span>
-                    <ExternalLink className="w-4 h-4 text-gray-400" />
+                </button>
+                
+                <PermissionGuard permission="delete_conversations">
+                  <div className="px-4">
+                    <button
+                      onClick={(e) => handleDeleteConversation(conversation.id, e)}
+                      disabled={deletingId === conversation.id}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Delete conversation"
+                    >
+                      {deletingId === conversation.id ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-5 h-5" />
+                      )}
+                    </button>
                   </div>
-                </div>
-              </button>
+                </PermissionGuard>
+              </div>
             ))}
           </div>
         )}
