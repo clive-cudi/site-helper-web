@@ -14,7 +14,6 @@ export function WidgetCodeModal({ website, onClose }: Props) {
   );
 
   const vanillaCode = `<script>
-  const vanillaCode = `<script>
   (function() {
     var script = document.createElement('script');
     script.src = '${window.location.origin}/widget.js';
