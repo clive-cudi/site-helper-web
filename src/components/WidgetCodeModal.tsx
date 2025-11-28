@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Website } from "../lib/supabase";
-import { X, Copy, Check } from "lucide-react";
+import { X, Copy, Check, Download } from "lucide-react";
+import { supabase } from "../lib/supabase";
 
 type Props = {
   website: Website;
@@ -12,6 +13,8 @@ export function WidgetCodeModal({ website, onClose }: Props) {
   const [activeTab, setActiveTab] = useState<"vanilla" | "react" | "nextjs">(
     "vanilla"
   );
+  const [downloading, setDownloading] = useState<'react' | 'nextjs' | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const vanillaCode = `<script>
   (function() {
@@ -82,6 +85,34 @@ export default function RootLayout({ children }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleDownload = async (framework: 'react' | 'nextjs') => {
+    setDownloading(framework);
+    setDownloadError(null);
+    
+    try {
+      const filename = framework === 'react' 
+        ? 'sitehelper-react-widget.zip'
+        : 'sitehelper-nextjs-widget.zip';
+      
+      const { data } = supabase.storage
+        .from('widget-packages')
+        .getPublicUrl(filename);
+      
+      // Trigger download
+      const link = document.createElement('a');
+      link.href = data.publicUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      setDownloadError('Failed to download widget package. Please try again.');
+      console.error('Download error:', error);
+    } finally {
+      setDownloading(null);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full">
@@ -146,14 +177,10 @@ export default function RootLayout({ children }) {
             {activeTab === "react" && (
               <div className="text-sm text-gray-700 mb-4 space-y-2">
                 <p className="font-medium">
-                  Step 1: Copy the widget components
+                  Step 1: Download the widget package
                 </p>
                 <p>
-                  Copy the files from{" "}
-                  <code className="bg-gray-100 px-1 rounded">
-                    src/components/widget/
-                  </code>{" "}
-                  to your React project.
+                  Download the pre-packaged widget components for React.
                 </p>
                 <p className="font-medium mt-3">
                   Step 2: Add the widget to your app
@@ -163,14 +190,10 @@ export default function RootLayout({ children }) {
             {activeTab === "nextjs" && (
               <div className="text-sm text-gray-700 mb-4 space-y-2">
                 <p className="font-medium">
-                  Step 1: Copy the widget components
+                  Step 1: Download the widget package
                 </p>
                 <p>
-                  Copy the files from{" "}
-                  <code className="bg-gray-100 px-1 rounded">
-                    src/components/widget/
-                  </code>{" "}
-                  to your Next.js project.
+                  Download the pre-packaged widget components for Next.js.
                 </p>
                 <p className="font-medium mt-3">
                   Step 2: Add the widget to your layout
@@ -193,6 +216,38 @@ export default function RootLayout({ children }) {
                 )}
               </button>
             </div>
+
+            {activeTab === "react" && (
+              <div className="mt-4">
+                <button
+                  onClick={() => handleDownload('react')}
+                  disabled={downloading === 'react'}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  {downloading === 'react' ? 'Downloading...' : 'Download React Widget Package'}
+                </button>
+                {downloadError && downloading !== 'react' && (
+                  <p className="text-sm text-red-600 mt-2">{downloadError}</p>
+                )}
+              </div>
+            )}
+
+            {activeTab === "nextjs" && (
+              <div className="mt-4">
+                <button
+                  onClick={() => handleDownload('nextjs')}
+                  disabled={downloading === 'nextjs'}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  {downloading === 'nextjs' ? 'Downloading...' : 'Download Next.js Widget Package'}
+                </button>
+                {downloadError && downloading !== 'nextjs' && (
+                  <p className="text-sm text-red-600 mt-2">{downloadError}</p>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
