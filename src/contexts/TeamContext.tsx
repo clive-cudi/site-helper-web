@@ -30,6 +30,17 @@ export interface BusinessAccount {
   id: string;
   name: string;
   owner_id: string;
+  phone: string | null;
+  website_url: string | null;
+  contact_email: string | null;
+  address_line_1: string | null;
+  address_line_2: string | null;
+  city: string | null;
+  state_region: string | null;
+  postal_code: string | null;
+  country: string | null;
+  support_hours: string | null;
+  business_description: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -56,7 +67,6 @@ export function TeamProvider({ children }: { children: ReactNode }) {
 
   // Load team data when user changes
   useEffect(() => {
-    console.log({ user });
     if (user) {
       loadTeamData();
     } else {
@@ -87,8 +97,6 @@ export function TeamProvider({ children }: { children: ReactNode }) {
         .eq("user_id", user.id)
         .eq("status", "active")
         .single();
-
-      console.log({ memberData });
 
       if (memberError) {
         console.error("Error loading team member:", memberError);

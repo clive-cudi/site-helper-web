@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { supabase, Conversation, Website } from '../lib/supabase';
 import { Loader2, MessageSquare, ExternalLink, Trash2 } from 'lucide-react';
 import { ConversationDetailModal } from './ConversationDetailModal';
 import { useTeam } from '../contexts/TeamContext';
 import { PermissionGuard } from './PermissionGuard';
+import { getOrCreateCanonicalWebsite } from '../services/website';
 
 type ConversationWithWebsite = Conversation & {
-  website: Website;
+  website: Website | null;
   message_count: number;
 };
 
@@ -16,38 +17,35 @@ export function ConversationList() {
   const [loading, setLoading] = useState(true);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [error, setError] = useState('');
+  const [hasWebsite, setHasWebsite] = useState(true);
 
-  useEffect(() => {
-    if (businessAccount) {
-      loadConversations();
-    }
-  }, [businessAccount]);
+  const loadConversations = useCallback(async () => {
+    if (!businessAccount) return;
 
-  const loadConversations = async () => {
     try {
-      // Query conversations through websites that belong to the business account
-      // RLS policies will automatically filter websites by business_account_id
-      const { data: websites, error: websitesError } = await supabase
-        .from('websites')
-        .select('id');
+      setLoading(true);
+      setError('');
+      const website = await getOrCreateCanonicalWebsite(businessAccount, {
+        createIfMissing: false,
+      });
 
-      if (websitesError) throw websitesError;
-
-      const websiteIds = websites?.map(w => w.id) || [];
-
-      if (websiteIds.length === 0) {
+      if (!website) {
+        setHasWebsite(false);
+        setConversations([]);
         setLoading(false);
         return;
       }
 
-      // Query conversations for the business account's websites
+      setHasWebsite(true);
+
       const { data: conversationsData, error: conversationsError } = await supabase
         .from('conversations')
         .select(`
           *,
           website:websites(*)
         `)
-        .in('website_id', websiteIds)
+        .eq('website_id', website.id)
         .order('last_message_at', { ascending: false });
 
       if (conversationsError) throw conversationsError;
@@ -67,12 +65,21 @@ export function ConversationList() {
       );
 
       setConversations(conversationsWithCount as ConversationWithWebsite[]);
-    } catch (error) {
-      console.error('Error loading conversations:', error);
+    } catch (loadError) {
+      console.error('Error loading conversations:', loadError);
+      setError('Failed to load conversations.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [businessAccount]);
+
+  useEffect(() => {
+    if (businessAccount) {
+      void loadConversations();
+    } else {
+      setLoading(false);
+    }
+  }, [businessAccount, loadConversations]);
 
   const handleDeleteConversation = async (conversationId: string, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent opening the conversation detail modal
@@ -126,13 +133,31 @@ export function ConversationList() {
   return (
     <>
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-gray-900">Conversations</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-900">Conversations</h2>
+          <button
+            onClick={() => void loadConversations()}
+            className="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
+          >
+            Refresh
+          </button>
+        </div>
+
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {error}
+          </div>
+        )}
 
         {conversations.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm p-12 text-center">
             <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No conversations yet</h3>
-            <p className="text-gray-600">Conversations will appear here once visitors start using your chat widget</p>
+            <p className="text-gray-600">
+              {hasWebsite
+                ? 'Conversations will appear once visitors start using your chat widget.'
+                : 'Set up your website URL and install widget from Settings to start receiving conversations.'}
+            </p>
           </div>
         ) : (
           <div className="bg-white rounded-xl shadow-sm divide-y divide-gray-200">
@@ -149,7 +174,7 @@ export function ConversationList() {
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
                         <span className="font-semibold text-gray-900">
-                          {conversation.website.name}
+                          {conversation.website?.name || "Business Website"}
                         </span>
                         <span className="text-sm text-gray-500">
                           Visitor {conversation.visitor_id.slice(0, 8)}

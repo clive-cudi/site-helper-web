@@ -133,12 +133,16 @@ export function WebsiteList() {
                       {website.name}
                     </h3>
                     <a
-                      href={website.url}
+                      href={website.url ?? "#"}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:underline truncate block"
+                      className={`text-sm truncate block ${
+                        website.url
+                          ? "text-blue-600 hover:underline"
+                          : "text-gray-500 cursor-not-allowed"
+                      }`}
                     >
-                      {website.url}
+                      {website.url || "No URL configured"}
                     </a>
                   </div>
                   {getStatusIcon(website.status)}
@@ -150,10 +154,10 @@ export function WebsiteList() {
                       website.status === "completed"
                         ? "bg-green-100 text-green-800"
                         : website.status === "processing"
-                        ? "bg-blue-100 text-blue-800"
-                        : website.status === "failed"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-gray-100 text-gray-800"
+                          ? "bg-blue-100 text-blue-800"
+                          : website.status === "failed"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-gray-100 text-gray-800"
                     }`}
                   >
                     {website.status}
@@ -175,7 +179,7 @@ export function WebsiteList() {
                     className="flex-1 flex items-center justify-center space-x-1 px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
                   >
                     <Eye className="w-4 h-4" />
-                    <span>View KB</span>
+                    <span>Knowledge base</span>
                   </button>
                   <button
                     onClick={() => {

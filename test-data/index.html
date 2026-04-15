@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Northstar Outdoor | Chat Widget Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-0: #050913;
+        --bg-1: #0b1530;
+        --surface: rgba(14, 25, 47, 0.78);
+        --surface-soft: rgba(255, 255, 255, 0.06);
+        --text: #e8f2ff;
+        --muted: #9fb4d8;
+        --line: rgba(169, 194, 232, 0.22);
+        --teal: #00d4b5;
+        --sky: #1cb1ff;
+        --sun: #ffcc66;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        color: var(--text);
+        background: radial-gradient(circle at 12% -8%, #223f75 0%, transparent 35%),
+          radial-gradient(circle at 100% 0%, #0d5f72 0%, transparent 28%),
+          linear-gradient(180deg, var(--bg-0), var(--bg-1));
+        font-family: "Manrope", sans-serif;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4 {
+        margin: 0;
+        line-height: 1.1;
+        font-family: "Space Grotesk", sans-serif;
+      }
+
+      p {
+        margin: 0;
+        line-height: 1.6;
+        color: var(--muted);
+      }
+
+      .container {
+        width: min(1160px, 92%);
+        margin: 0 auto;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        backdrop-filter: blur(14px);
+        background: rgba(7, 12, 28, 0.72);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .nav {
+        min-height: 76px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1.12rem;
+        font-weight: 700;
+      }
+
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: linear-gradient(120deg, var(--teal), var(--sky));
+        box-shadow: 0 0 15px rgba(28, 177, 255, 0.75);
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .btn {
+        border: 1px solid transparent;
+        border-radius: 12px;
+        padding: 10px 16px;
+        font-family: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .btn.primary {
+        color: #052b2d;
+        background: linear-gradient(130deg, var(--teal), #54ffe6);
+      }
+
+      .btn.ghost {
+        color: #d7e8ff;
+        background: var(--surface-soft);
+        border-color: var(--line);
+      }
+
+      .hero {
+        padding: 66px 0 34px;
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 22px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        background: var(--surface);
+        box-shadow: 0 30px 55px rgba(0, 0, 0, 0.3);
+      }
+
+      .hero-main {
+        padding: 34px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 212, 181, 0.35);
+        background: rgba(0, 212, 181, 0.12);
+        color: #96ffe9;
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        padding: 8px 12px;
+      }
+
+      .hero-main h1 {
+        margin: 14px 0;
+        font-size: clamp(2.1rem, 4.2vw, 3.9rem);
+        letter-spacing: -0.03em;
+      }
+
+      .hero-main p {
+        max-width: 60ch;
+      }
+
+      .hero-buttons {
+        margin-top: 24px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .metrics {
+        margin-top: 24px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .metric {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 12px;
+      }
+
+      .metric strong {
+        display: block;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1.35rem;
+      }
+
+      .metric span {
+        font-size: 0.82rem;
+        color: #a9c2e9;
+      }
+
+      .hero-side img {
+        width: 100%;
+        height: 300px;
+        display: block;
+        object-fit: cover;
+        border-radius: 22px 22px 0 0;
+      }
+
+      .hero-side .info {
+        padding: 18px 20px 22px;
+      }
+
+      .hero-side .info h3 {
+        margin-bottom: 8px;
+      }
+
+      .section {
+        margin: 10px 0 58px;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .section-head h2 {
+        font-size: clamp(1.45rem, 3vw, 2.05rem);
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .feature {
+        padding: 20px;
+      }
+
+      .feature h3 {
+        margin-bottom: 8px;
+      }
+
+      .gallery {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr 1fr;
+        gap: 14px;
+      }
+
+      .card {
+        min-height: 225px;
+        overflow: hidden;
+        position: relative;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+      }
+
+      .card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .card .label {
+        position: absolute;
+        inset: auto 0 0 0;
+        background: linear-gradient(180deg, transparent, rgba(6, 10, 24, 0.92));
+        padding: 14px;
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 700;
+      }
+
+      .test-note {
+        border: 1px solid rgba(255, 204, 102, 0.35);
+        background: linear-gradient(135deg, rgba(255, 204, 102, 0.12), rgba(28, 177, 255, 0.12));
+        border-radius: 18px;
+        padding: 20px;
+      }
+
+      code {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 2px 7px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #d4f9ff;
+      }
+
+      footer {
+        margin-top: 58px;
+        border-top: 1px solid var(--line);
+        padding: 24px 0 46px;
+      }
+
+      @media (max-width: 980px) {
+        .hero,
+        .features,
+        .gallery,
+        .metrics {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container nav">
+        <div class="brand"><span class="dot"></span>Northstar Outdoor</div>
+        <div class="actions">
+          <button class="btn ghost">Collections</button>
+          <button class="btn primary">Shop New Arrivals</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <article class="panel hero-main">
+          <span class="badge">SiteHelper Widget Test Page</span>
+          <h1>Premium outdoor gear with instant AI customer support</h1>
+          <p>
+            Use this sleek demo landing page to validate your chat widget behavior.
+            Try prompts like “What are your support hours?”, “Do you offer store
+            pickup?”, and “How long does shipping take?”
+          </p>
+          <div class="hero-buttons">
+            <button class="btn primary">Explore Equipment</button>
+            <button class="btn ghost">Book In-store Fitting</button>
+          </div>
+          <div class="metrics">
+            <div class="metric">
+              <strong>24/7</strong>
+              <span>Assistant Coverage</span>
+            </div>
+            <div class="metric">
+              <strong>&lt;2m</strong>
+              <span>Response Target</span>
+            </div>
+            <div class="metric">
+              <strong>4.9/5</strong>
+              <span>Support Satisfaction</span>
+            </div>
+          </div>
+        </article>
+
+        <aside class="panel hero-side">
+          <img
+            src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80"
+            alt="Mountain hiking scene"
+          />
+          <div class="info">
+            <h3>Support Snapshot</h3>
+            <p>
+              Mon-Fri 8:00 AM-6:00 PM ET · Sat 9:00 AM-1:00 PM ET<br />
+              Free shipping over $75 · 30-day returns
+            </p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Why customers buy from Northstar</h2>
+          <p>These blocks help you test policy-related assistant replies.</p>
+        </div>
+        <div class="features">
+          <article class="panel feature">
+            <h3>Tested in real terrain</h3>
+            <p>Gear selected for alpine, trail, and all-weather performance.</p>
+          </article>
+          <article class="panel feature">
+            <h3>Reliable shipping</h3>
+            <p>Standard delivery 3-7 days. Express delivery 1-2 days.</p>
+          </article>
+          <article class="panel feature">
+            <h3>Concierge-level support</h3>
+            <p>Immediate assistant answers with handoff to human agents.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Featured gear gallery</h2>
+          <p>Image-rich product context for realistic conversation testing.</p>
+        </div>
+        <div class="gallery">
+          <article class="card">
+            <img
+              src="https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=1300&q=80"
+              alt="Hiker with backpack"
+            />
+            <div class="label">Summit 40L Trail Pack</div>
+          </article>
+          <article class="card">
+            <img
+              src="https://images.unsplash.com/photo-1522163182402-834f871fd851?auto=format&fit=crop&w=900&q=80"
+              alt="Camping tent setup"
+            />
+            <div class="label">Riverbend 2P Tent</div>
+          </article>
+          <article class="card">
+            <img
+              src="https://images.unsplash.com/photo-1501554728187-ce583db33af7?auto=format&fit=crop&w=900&q=80"
+              alt="Hiking boots close-up"
+            />
+            <div class="label">TrailGuard GTX Boots</div>
+          </article>
+        </div>
+      </section>
+
+      <section class="test-note">
+        <h3 style="margin-bottom: 8px">Widget testing note</h3>
+        <p>
+          This page is already wired to your widget ID. If needed, update
+          <code>data-website-id</code> in the embed script below.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container">
+        <p>Northstar Outdoor · Demo page for SiteHelper widget QA</p>
+      </div>
+    </footer>
+
+    <!-- SiteHelper Widget Embed -->
+    <script>
+      (function () {
+        var script = document.createElement("script");
+        script.src = "http://localhost:5173/widget.js";
+        script.setAttribute("data-website-id", "cef315d3-5d87-4b83-afb8-3c1b11cd4a5f");
+        script.setAttribute(
+          "data-api-url",
+          "https://xroxewnixziieyegykjn.supabase.co"
+        );
+        script.async = true;
+        document.head.appendChild(script);
+      })();
+    </script>
+  </body>
+</html>

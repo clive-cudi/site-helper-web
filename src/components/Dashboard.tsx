@@ -1,31 +1,46 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTeam } from '../contexts/TeamContext';
-import { LogOut, Globe, MessageSquare, Settings, Users } from 'lucide-react';
-import { WebsiteList } from './WebsiteList';
+import { LogOut, Globe, MessageSquare, Settings, Users, BookOpen, BarChart3, LayoutDashboard } from 'lucide-react';
+import { KnowledgeBaseWorkspace } from './KnowledgeBaseWorkspace';
 import { ConversationList } from './ConversationList';
 import { TeamManagement } from './TeamManagement';
+import { SettingsPanel } from './SettingsPanel';
+import { ReportsPanel } from './ReportsPanel';
+import { OverviewPanel } from './OverviewPanel';
 import type { Permission } from '../services/permissions';
 
-type Tab = 'websites' | 'conversations' | 'team' | 'settings';
+type Tab = 'overview' | 'knowledge-base' | 'conversations' | 'reports' | 'team' | 'settings';
 
 export function Dashboard() {
   const { user, signOut } = useAuth();
   const { hasPermission } = useTeam();
-  const [activeTab, setActiveTab] = useState<Tab>('websites');
+  const [activeTab, setActiveTab] = useState<Tab>('overview');
 
   // Define tabs with permission requirements
   const tabs = [
     {
-      id: 'websites' as Tab,
-      label: 'Websites',
-      icon: Globe,
-      permission: 'view_websites' as Permission,
+      id: 'overview' as Tab,
+      label: 'Overview',
+      icon: LayoutDashboard,
+      permission: null, // Always visible
+    },
+    {
+      id: 'knowledge-base' as Tab,
+      label: 'Knowledge Base',
+      icon: BookOpen,
+      permission: 'view_knowledge_bases' as Permission,
     },
     {
       id: 'conversations' as Tab,
       label: 'Conversations',
       icon: MessageSquare,
+      permission: 'view_conversations' as Permission,
+    },
+    {
+      id: 'reports' as Tab,
+      label: 'Reports',
+      icon: BarChart3,
       permission: 'view_conversations' as Permission,
     },
     {
@@ -98,15 +113,12 @@ export function Dashboard() {
         </div>
 
         <div className="mt-6">
-          {activeTab === 'websites' && <WebsiteList />}
+          {activeTab === 'overview' && <OverviewPanel />}
+          {activeTab === 'knowledge-base' && <KnowledgeBaseWorkspace />}
           {activeTab === 'conversations' && <ConversationList />}
+          {activeTab === 'reports' && <ReportsPanel />}
           {activeTab === 'team' && <TeamManagement />}
-          {activeTab === 'settings' && (
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Settings</h2>
-              <p className="text-gray-600">Settings panel coming soon.</p>
-            </div>
-          )}
+          {activeTab === 'settings' && <SettingsPanel />}
         </div>
       </div>
     </div>

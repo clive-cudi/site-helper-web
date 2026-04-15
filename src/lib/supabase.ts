@@ -13,6 +13,26 @@ export type BusinessAccount = {
   id: string;
   name: string;
   owner_id: string;
+  phone: string | null;
+  website_url: string | null;
+  contact_email: string | null;
+  address_line_1: string | null;
+  address_line_2: string | null;
+  city: string | null;
+  state_region: string | null;
+  postal_code: string | null;
+  country: string | null;
+  support_hours: string | null;
+  business_description: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Profile = {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  phone: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -48,7 +68,7 @@ export type AuditLog = {
   action: string;
   resource_type: string;
   resource_id: string | null;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   created_at: string;
 };
 
@@ -56,7 +76,7 @@ export type Website = {
   id: string;
   business_account_id: string;
   name: string;
-  url: string;
+  url: string | null;
   status: 'pending' | 'processing' | 'completed' | 'failed';
   scrape_error: string | null;
   widget_config: {
@@ -74,7 +94,7 @@ export type KnowledgeBase = {
   website_id: string;
   content: string;
   summary: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 };
@@ -85,7 +105,7 @@ export type Conversation = {
   visitor_id: string;
   started_at: string;
   last_message_at: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 };
 
 export type Message = {

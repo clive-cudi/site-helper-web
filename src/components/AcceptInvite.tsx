@@ -168,7 +168,11 @@ export function AcceptInvite() {
 
     try {
       if (isSignUp) {
-        await signUp(email, password);
+        await signUp({
+          email,
+          password,
+          invitedSignup: true,
+        });
         // After signup, the user will be authenticated and we can accept the invitation
         // The useEffect will trigger handleAcceptInvitation when user becomes available
       } else {

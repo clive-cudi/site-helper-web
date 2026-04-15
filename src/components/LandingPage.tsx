@@ -1,4 +1,11 @@
-import { Bot, Globe, MessageSquare, Zap, Shield, BarChart3 } from 'lucide-react';
+import {
+  Bot,
+  Globe,
+  MessageSquare,
+  Zap,
+  Shield,
+  BarChart3,
+} from "lucide-react";
 
 type Props = {
   onGetStarted: () => void;
@@ -12,7 +19,7 @@ export function LandingPage({ onGetStarted }: Props) {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Globe className="w-8 h-8 text-blue-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">SiteHelper</span>
+              <span className="ml-2 text-xl font-bold text-gray-900"></span>
             </div>
             <button
               onClick={onGetStarted}
@@ -27,10 +34,12 @@ export function LandingPage({ onGetStarted }: Props) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-20">
           <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            AI-Powered Website Assistant for Your Business
+            Customer Support for Your Business
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Transform your website into a 24/7 customer support hub. SiteHelper automatically learns from your website content and provides instant, accurate answers to visitor questions.
+            Transform your website into a 24/7 customer support hub. SiteHelper
+            automatically learns from your website content and provides instant,
+            accurate answers to visitor questions.
           </p>
           <div className="flex justify-center space-x-4">
             <button
@@ -53,9 +62,13 @@ export function LandingPage({ onGetStarted }: Props) {
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
               <Zap className="w-6 h-6 text-blue-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">Instant Setup</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">
+              Instant Setup
+            </h3>
             <p className="text-gray-600">
-              Add your website URL and our AI automatically extracts and analyzes your content to create a comprehensive knowledge base in minutes.
+              Add your website URL and our AI automatically extracts and
+              analyzes your content to create a comprehensive knowledge base in
+              minutes.
             </p>
           </div>
 
@@ -63,9 +76,13 @@ export function LandingPage({ onGetStarted }: Props) {
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
               <Bot className="w-6 h-6 text-green-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">Smart AI Assistant</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">
+              Smart AI Assistant
+            </h3>
             <p className="text-gray-600">
-              Powered by advanced AI that understands context and provides accurate, helpful responses based on your website's actual content.
+              Powered by advanced AI that understands context and provides
+              accurate, helpful responses based on your website's actual
+              content.
             </p>
           </div>
 
@@ -73,9 +90,12 @@ export function LandingPage({ onGetStarted }: Props) {
             <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
               <MessageSquare className="w-6 h-6 text-orange-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">Easy Integration</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">
+              Easy Integration
+            </h3>
             <p className="text-gray-600">
-              Simple copy-paste widget that works on any website. Customize colors, position, and greeting message to match your brand.
+              Simple copy-paste widget that works on any website. Customize
+              colors, position, and greeting message to match your brand.
             </p>
           </div>
 
@@ -83,9 +103,13 @@ export function LandingPage({ onGetStarted }: Props) {
             <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
               <Shield className="w-6 h-6 text-red-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">Secure & Private</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">
+              Secure & Private
+            </h3>
             <p className="text-gray-600">
-              Your data is encrypted and secure. We never share visitor information, and you maintain full control over your knowledge base.
+              Your data is encrypted and secure. We never share visitor
+              information, and you maintain full control over your knowledge
+              base.
             </p>
           </div>
 
@@ -93,9 +117,12 @@ export function LandingPage({ onGetStarted }: Props) {
             <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center mb-4">
               <BarChart3 className="w-6 h-6 text-cyan-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">Conversation Analytics</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">
+              Conversation Analytics
+            </h3>
             <p className="text-gray-600">
-              Track all conversations, understand common questions, and improve your content based on real visitor interactions.
+              Track all conversations, understand common questions, and improve
+              your content based on real visitor interactions.
             </p>
           </div>
 
@@ -103,17 +130,24 @@ export function LandingPage({ onGetStarted }: Props) {
             <div className="w-12 h-12 bg-violet-100 rounded-lg flex items-center justify-center mb-4">
               <Globe className="w-6 h-6 text-violet-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">Multiple Websites</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">
+              Knowledge Base First
+            </h3>
             <p className="text-gray-600">
-              Manage multiple websites from a single dashboard. Each site gets its own customized AI assistant with unique knowledge.
+              Start by editing your business knowledge base and optionally
+              scrape your website content. Keep one clear source of truth for
+              your assistant.
             </p>
           </div>
         </div>
 
         <div className="bg-blue-600 rounded-2xl p-12 text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">Ready to enhance your website?</h2>
+          <h2 className="text-3xl font-bold mb-4">
+            Ready to enhance your website?
+          </h2>
           <p className="text-xl mb-8 text-blue-100">
-            Join businesses that are already providing better customer support with AI
+            Join businesses that are already providing better customer support
+            with AI
           </p>
           <button
             onClick={onGetStarted}
@@ -128,7 +162,9 @@ export function LandingPage({ onGetStarted }: Props) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex items-center justify-center mb-4">
             <Globe className="w-6 h-6 text-blue-500" />
-            <span className="ml-2 text-lg font-semibold text-white">SiteHelper</span>
+            <span className="ml-2 text-lg font-semibold text-white">
+              SiteHelper
+            </span>
           </div>
           <p>AI-Powered Website Assistant for Small and Medium Businesses</p>
         </div>

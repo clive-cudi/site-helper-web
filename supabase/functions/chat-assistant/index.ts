@@ -7,6 +7,41 @@ const corsHeaders = {
     "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
+function buildBusinessContext(websiteRow: Record<string, unknown> | null): string {
+  if (!websiteRow) return "Business details are not available.";
+
+  const websiteName = (websiteRow.name as string | null) || "";
+  const websiteUrl = (websiteRow.url as string | null) || "";
+
+  const business = websiteRow.business_accounts as Record<string, unknown> | null;
+
+  const businessName = (business?.name as string | null) || websiteName || "";
+  const phone = (business?.phone as string | null) || "";
+  const contactEmail = (business?.contact_email as string | null) || "";
+  const addressLine1 = (business?.address_line_1 as string | null) || "";
+  const addressLine2 = (business?.address_line_2 as string | null) || "";
+  const city = (business?.city as string | null) || "";
+  const stateRegion = (business?.state_region as string | null) || "";
+  const postalCode = (business?.postal_code as string | null) || "";
+  const country = (business?.country as string | null) || "";
+  const supportHours = (business?.support_hours as string | null) || "";
+  const description = (business?.business_description as string | null) || "";
+
+  const location = [addressLine1, addressLine2, city, stateRegion, postalCode, country]
+    .filter(Boolean)
+    .join(", ");
+
+  return [
+    `Business Name: ${businessName || "Not provided"}`,
+    `Website: ${websiteUrl || "Not provided"}`,
+    `Support Email: ${contactEmail || "Not provided"}`,
+    `Phone: ${phone || "Not provided"}`,
+    `Location: ${location || "Not provided"}`,
+    `Support Hours: ${supportHours || "Not provided"}`,
+    `Business Description: ${description || "Not provided"}`,
+  ].join("\n");
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -63,8 +98,35 @@ Deno.serve(async (req: Request) => {
       .eq("website_id", websiteId)
       .single();
 
+    const { data: websiteData } = await supabase
+      .from("websites")
+      .select(
+        `
+        name,
+        url,
+        business_accounts (
+          name,
+          phone,
+          contact_email,
+          address_line_1,
+          address_line_2,
+          city,
+          state_region,
+          postal_code,
+          country,
+          support_hours,
+          business_description
+        )
+      `
+      )
+      .eq("id", websiteId)
+      .maybeSingle();
+
     const knowledgeBaseContent = kb?.content || "No knowledge base available.";
     const kbSummary = kb?.summary || "";
+    const businessContext = buildBusinessContext(
+      (websiteData as Record<string, unknown> | null) ?? null
+    );
 
     const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
 
@@ -88,10 +150,22 @@ Deno.serve(async (req: Request) => {
               messages: [
                 {
                   role: "system",
-                  content: `You are a helpful customer service assistant for a website. Use the following knowledge base to answer questions accurately and helpfully.\n\nKnowledge Base Summary: ${kbSummary}\n\nKnowledge Base Content:\n${knowledgeBaseContent.substring(
+                  content: `You are a helpful customer service assistant for a website. Use the following business and knowledge-base context to answer questions accurately and helpfully.
+
+Business Profile:
+${businessContext}
+
+Knowledge Base Summary: ${kbSummary}
+
+Knowledge Base Content:
+${knowledgeBaseContent.substring(
                     0,
                     8000
-                  )}\n\nIf you don't know the answer based on the knowledge base, politely say so and offer to help in other ways. Keep responses brief and relevant, while maintaining a conversational tone.`,
+                  )}
+
+If the customer asks about contact details, hours, or location, prioritize Business Profile information.
+If you don't know the answer based on this context, politely say so and offer to help in other ways.
+Keep responses brief, practical, and conversational.`,
                 },
                 {
                   role: "user",

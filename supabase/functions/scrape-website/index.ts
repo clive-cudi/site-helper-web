@@ -16,7 +16,8 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { websiteId, url } = await req.json();
+    const { websiteId, url, mode } = await req.json();
+    const scrapeMode = mode === "replace" ? "replace" : "append";
 
     if (!websiteId || !url) {
       return new Response(
@@ -67,12 +68,43 @@ Deno.serve(async (req: Request) => {
         content.split(" ").length
       } words of content.`;
 
+      const { data: existingKb, error: existingKbError } = await supabase
+        .from("knowledge_bases")
+        .select("id, content, metadata")
+        .eq("website_id", websiteId)
+        .maybeSingle();
+
+      if (existingKbError) throw existingKbError;
+
+      const scrapeSection = `\n\n---\n[Scraped Source: ${url}]\n[Scraped At: ${new Date().toISOString()}]\n---\n${content}\n`;
+
+      let nextContent = content;
+      let nextMetadata: Record<string, unknown> = {
+        ...(existingKb?.metadata || {}),
+        url,
+        scraped_at: new Date().toISOString(),
+        scrape_mode: scrapeMode,
+      };
+
+      if (scrapeMode === "append") {
+        nextContent = `${existingKb?.content || ""}${scrapeSection}`.trim();
+      } else if (existingKb?.content) {
+        nextMetadata = {
+          ...nextMetadata,
+          last_replaced_backup: {
+            content: existingKb.content,
+            source_url: url,
+            replaced_at: new Date().toISOString(),
+          },
+        };
+      }
+
       await supabase
         .from("knowledge_bases")
         .update({
-          content,
+          content: nextContent,
           summary,
-          metadata: { url, scraped_at: new Date().toISOString() },
+          metadata: nextMetadata,
           updated_at: new Date().toISOString(),
         })
         .eq("website_id", websiteId);
@@ -81,8 +113,8 @@ Deno.serve(async (req: Request) => {
         .from("websites")
         .update({ status: "completed", updated_at: new Date().toISOString() })
         .eq("id", websiteId);
-    } catch (scrapeError: any) {
-      error = scrapeError.message;
+    } catch (scrapeError: unknown) {
+      error = scrapeError instanceof Error ? scrapeError.message : "Unknown scrape error";
       await supabase
         .from("websites")
         .update({
@@ -104,10 +136,15 @@ Deno.serve(async (req: Request) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
+  } catch (error: unknown) {
+    return new Response(
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "Unexpected error",
+      }),
+      {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+      }
+    );
   }
 });
